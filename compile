@@ -1,0 +1,3 @@
+#!/bin/bash
+
+g++  src/Video.cpp  -I src/ -o build/videotest $(pkg-config --libs opencv)
