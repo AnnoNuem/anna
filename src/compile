@@ -1,3 +1,5 @@
 #!/bin/bash
 
-g++  main.cpp Ultraschall.cpp Motorsteuerung.cpp  -o ../build/handsteuerung  -std=c++11 -lwiringPi -lcurses 
+g++  main.cpp Ultraschall.cpp Motorsteuerung.cpp Buzzer.cpp -o ../build/anna -std=c++11 -lpthread -lwiringPi -lcurses 
+sudo chown root ../build/anna
+sudo chmod +s ../build/anna
