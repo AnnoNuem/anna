@@ -28,10 +28,11 @@ int main(int argc, const char* argv[]){
 	double hueLeftOld;
 	double hueRightOld;
 	uchar *frameData;
-	double bias = 0;
+	double bias = -98;
 	double biasDelta = 1;
 	double multiplikator = 1;
 	double multiplikatorDelta = 0.1;
+	double delta = 0.5;
 
 
 
@@ -119,9 +120,11 @@ int main(int argc, const char* argv[]){
 				case keyMultUp: multiplikator += multiplikatorDelta; break;
 				case keyMultDown: multiplikator -= multiplikatorDelta; break;
 			}
-			m.setLeftSpeed(hueRight);
-			m.setRightSpeed(hueLeft);
+			m.setLeftSpeed(hueLeft);
+			m.setRightSpeed(hueRight);
 		}
+		hueRightOld = hueRight;
+		hueLeftOld = hueLeft;
 	}while( ch != 'x');
 	endwin();
 	return 0;
