@@ -96,6 +96,20 @@ void Motorsteuerung::changeDirectionRight(void){
 	this->writeOut();
 }
 
+void Motorsteuerung::setLeftSpeed(int speed){
+	if (0 < speed < LeftPwmRange){
+		LeftSpeed = speed;
+		this->writeOut();
+	}
+}
+
+void Motorsteuerung::setRightSpeed(int speed){
+	if (0 < speed < RightPwmRange){
+		RightSpeed = speed;
+		this->writeOut();
+	}
+}
+
 void Motorsteuerung::setSpeed(int speed)
 {
 			printw("wwwww");

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+g++  main.cpp Ultraschall.cpp Motorsteuerung.cpp  -o ../build/handsteuerung  -std=c++11 -lwiringPi -lcurses 

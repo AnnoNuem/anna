@@ -48,6 +48,8 @@ class Motorsteuerung{
 	~Motorsteuerung();
 	
 	void setSpeed(int speed);
+	void setLeftSpeed(int speed);
+	void setRightSpeed(int speed);
 	void faster(void);
 	void slower(void);
 	void left(void);
