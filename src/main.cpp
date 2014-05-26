@@ -26,13 +26,27 @@ int main(int argc, const char* argv[]){
 	
 	Motorsteuerung& m = Motorsteuerung::instance();
 	Ultraschall& u = Ultraschall::instance();
-	Video& v = Video::instance();
+	Video* v = 0;
+	try
+	{
+		v->instance();
+	}
+	catch (int e)
+	{
+		if (e == -1)
+		{
+			endwin();
+			std::cout << "Unable to open Video Source.\n";
+			return -1;
+		}
+	}
+
 	
 	do{
 		distance = u.getDistance();
 		clear();
 		printw("Distance is: %d", distance);
-		v.process();
+		//v->process();
 		if (distance < 60 && !ignoreUltraschall)
 		{
 			m.stop();

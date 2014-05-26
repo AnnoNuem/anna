@@ -1,12 +1,15 @@
 #include <Video.hpp>
+#include <iostream>
 
 	Video::Video()
 	{
 		cap.open(0);
 		if(!cap.isOpened())
 		{
-			cap = 0;
+			throw -1;
 		}
+//		cap.set(CV_CAP_PROP_FRAME_WIDTH, 160);
+//		cap.set(CV_CAP_PROP_FRAME_HEIGHT, 120);
 	}
 
 	void Video::process()
