@@ -11,7 +11,20 @@ class Video{
 
 	Video();
 
+	Video(const Video&);
+
+	Video& operator= (const Video);
+
+	public:
 	void process();
+
+	static Video& instance()
+	{
+		static Video _instance;
+		return _instance;
+	}
+
+	~Video(){};
 };
 
 
