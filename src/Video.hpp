@@ -8,6 +8,8 @@ using namespace cv;
 class Video{
 	VideoCapture cap;
 	Mat frame;
+	Mat frameSmall;
+	Size sizeSmall;
 
 	Video();
 

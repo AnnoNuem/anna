@@ -29,7 +29,7 @@ int main(int argc, const char* argv[]){
 	Video* v = 0;
 	try
 	{
-		v->instance();
+		v = &Video::instance();
 	}
 	catch (int e)
 	{
@@ -46,7 +46,7 @@ int main(int argc, const char* argv[]){
 		distance = u.getDistance();
 		clear();
 		printw("Distance is: %d", distance);
-		//v->process();
+		v->process();
 		if (distance < 60 && !ignoreUltraschall)
 		{
 			m.stop();
