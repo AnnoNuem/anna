@@ -1,0 +1,130 @@
+#####################################################################
+#
+#  ::::_aureservoir_::::
+#  C++ library for analog reservoir computing neural networks
+#
+#  Scons build system for pure data bindings
+#
+#  Georg Holzmann, 2007
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#####################################################################
+
+import os, glob, sys, os.path
+
+#####################################################################
+#  build files
+#####################################################################
+
+sources = glob.glob("*.cpp")   # build all *.cpp files
+
+#####################################################################
+#  build system help
+#####################################################################
+
+Help("\nType: 'scons' to build the pd externals.")
+Help("\n      'scons -c' to clean objects and pd externals.\n")
+
+#####################################################################
+#  general build options
+#####################################################################
+
+# TODO linken funktioniert net richtig, ldd findet libaureservoir nicht !
+
+env = Environment( CPPPATH=['.'] )
+env.Append(CCFLAGS="-O2 -fPIC -Wall")
+env.Append(LINKFLAGS="-export-dynamic")
+
+#####################################################################
+#  command line options
+#####################################################################
+
+opt = Options('options.cache')
+opt.AddOptions(
+  PathOption('aureservoir_path', 'include path for aureservoir', None),
+  PathOption('flens_path', 'include path for FLENS', None),
+  PathOption('pd_path', 'include path for Pure Data', None),
+  ('arch', 'optimize for specific architecture (e.g. pentium4)', None),
+)
+opt.Update(env)
+opt.Save('options.cache',env)
+Help(opt.GenerateHelpText(env))
+
+if env.has_key('aureservoir_path'):
+	env.Append(CPPPATH=[env['aureservoir_path']])
+if env.has_key('flens_path'):
+	env.Append(CPPPATH=[env['flens_path']])
+if env.has_key('pd_path'):
+	env.Append(CPPPATH=[env['pd_path']])
+if env.has_key('arch'):
+	env.Append(CCFLAGS="-march=" + env['arch'])
+
+#####################################################################
+#  platform specific configuration
+#####################################################################
+
+if env['PLATFORM'] == 'posix':
+	pd_suffix = ".pd_linux"
+	env.Append(CCFLAGS="-DUNIX")
+
+elif env['PLATFORM'] == 'win32':
+	pd_suffix = ".dll"
+	env.Append(CCFLAGS="-DMSW -mms-bitfields")
+
+elif env['PLATFORM'] == 'darwin':
+	pd_suffix = ".pd_darwin"
+
+else:
+	print "unsupported platform"
+	Exit(1)
+
+#####################################################################
+#  check dependencies
+#####################################################################
+
+# don't check in help or clean mode
+checking = 1
+if "-h" in sys.argv:
+	checking = 0
+if env.GetOption('clean'):
+	checking = 0
+
+# do the checks
+conf = Configure(env)
+if checking:
+	if not conf.CheckLib('aureservoir', language="C++"):
+		print 'Did not find aureservoir library !'
+		Exit(1)
+	if not conf.CheckCXXHeader('aureservoir/aureservoir.h'):
+		print 'Did not find aureservoir header (aureservoir/aureservoir.h) !'
+		Exit(1)
+	if not conf.CheckLib('flens', language="C++"):
+		print 'Did not find FLENS library !'
+		Exit(1)
+	if not conf.CheckCXXHeader('flens/flens.h'):
+		print 'Did not find FLENS header (flens/flens.h) !'
+		Exit(1)
+	if not conf.CheckHeader('m_pd.h'):
+		print 'Did not find PD header (m_pd.h) !'
+		Exit(1)
+env = conf.Finish()
+
+#####################################################################
+#  build pure data externals
+#####################################################################
+
+for file in sources:
+	external = os.path.splitext(file)[0]
+	env.SharedLibrary( external,
+                           file,
+                           SHLIBPREFIX="",
+                           SHLIBSUFFIX=pd_suffix )
+# TODO: strip dazumachen: strip --strip-unneeded $*.pd_linux
+
+#####################################################################
+#  EOF
+#####################################################################

@@ -1,0 +1,103 @@
+#####################################################################
+#
+#  ::::_aureservoir_::::
+#  C++ library for analog reservoir computing neural networks
+#
+#  Scons build system for example files
+#
+#  Georg Holzmann, 2007
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#####################################################################
+
+import os, glob, sys
+
+#####################################################################
+#  build files
+#####################################################################
+
+sources = glob.glob("*.cpp")   # build all *.cpp files
+
+#####################################################################
+#  build system help
+#####################################################################
+
+Help("\nType: 'scons' to build the example programs.")
+Help("\n      'scons -c' to clean objects and build programs.\n")
+
+#####################################################################
+#  build options
+#####################################################################
+
+env = Environment(ENV = {'PATH' : os.environ['PATH'],
+                         'TERM' : os.environ['TERM'],
+                         'HOME' : os.environ['HOME']})
+env.Append( CPPPATH=['.', '../'] )
+env.Append(CCFLAGS="-O2 -fPIC -Wall -ffast-math -mfpmath=sse -msse -msse2")
+
+#####################################################################
+#  command line options
+#####################################################################
+
+opt = Options('options.cache')
+opt.AddOptions(
+  PathOption('flens_path', 'include path for FLENS', None),
+  PathOption('fftw3_path', 'include path for FFTW3', None),
+  ('arch', 'optimize for specific architecture (e.g. pentium4)', None),
+)
+opt.Update(env)
+opt.Save('options.cache',env)
+Help(opt.GenerateHelpText(env))
+
+if env.has_key('flens_path'):
+	env.Append(CPPPATH=[env['flens_path']])
+if env.has_key('fftw3_path'):
+	env.Append(CPPPATH=[env['fftw3_path']])
+if env.has_key('arch'):
+	env.Append(CCFLAGS="-march=" + env['arch'])
+
+#####################################################################
+#  check dependencies
+#####################################################################
+
+# don't check in help or clean mode
+checking = 1
+if "-h" in sys.argv:
+	checking = 0
+if env.GetOption('clean'):
+	checking = 0
+
+# do the checks
+conf = Configure(env)
+if checking:
+	if not conf.CheckLib('flens', language="C++"):
+		print 'Did not find FLENS library !'
+		Exit(1)
+	if not conf.CheckCXXHeader('flens/flens.h'):
+		print 'Did not find FLENS header !'
+		Exit(1)
+	if not conf.CheckLib('fftw3', language="C"):
+		print 'Did not find FFTW3 library !'
+		Exit(1)
+	if not conf.CheckLib('fftw3f', language="C"):
+		print 'Did not find FFTW3 single precision library !'
+		Exit(1)
+	if not conf.CheckHeader('fftw3.h'):
+		print 'Did not find FFTW3 header !'
+		Exit(1)
+env = conf.Finish()
+
+#####################################################################
+#  build programs
+#####################################################################
+
+for file in sources:
+	env.Program(file)
+
+#####################################################################
+#  EOF
+#####################################################################

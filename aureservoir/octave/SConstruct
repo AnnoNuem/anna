@@ -1,0 +1,113 @@
+#####################################################################
+#
+#  ::::_aureservoir_::::
+#  C++ library for analog reservoir computing neural networks
+#
+#  Scons build system for octave bindings
+#
+#  Georg Holzmann, 2007
+#
+#  This library is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU Lesser General Public
+#  License as published by the Free Software Foundation; either
+#  version 2.1 of the License, or (at your option) any later version.
+#
+#####################################################################
+
+import os, glob, sys
+
+#####################################################################
+#  build system help
+#####################################################################
+
+Help("\nType: 'scons' to build the octave bindings.")
+Help("\n      'scons -c' to clean objects and oct files.\n")
+
+#####################################################################
+#  general build options
+#####################################################################
+
+env = Environment(ENV = {'PATH' : os.environ['PATH'],
+                         'TERM' : os.environ['TERM'],
+                         'HOME' : os.environ['HOME']})
+env.Append( CPPPATH=['.', '../'] )
+env.Append(CCFLAGS="-O2 -fPIC -Wall -ffast-math -mfpmath=sse -msse -msse2")
+
+#####################################################################
+#  command line options
+#####################################################################
+
+opt = Options('options.cache')
+opt.AddOptions(
+  PathOption('octave_path', 'include path for octave', None),
+  PathOption('flens_path', 'include path for FLENS', None),
+  ('arch', 'optimize for specific architecture (e.g. pentium4)', None),
+)
+opt.Update(env)
+opt.Save('options.cache',env)
+Help(opt.GenerateHelpText(env))
+
+if env.has_key('octave_path'):
+	env.Append(CPPPATH=[env['octave_path']])
+if env.has_key('flens_path'):
+	env.Append(CPPPATH=[env['flens_path']])
+if env.has_key('arch'):
+	env.Append(CCFLAGS="-march=" + env['arch'])
+
+#####################################################################
+#  check dependencies
+#####################################################################
+
+# don't check in help or clean mode
+checking = 1
+if "-h" in sys.argv:
+	checking = 0
+if env.GetOption('clean'):
+	checking = 0
+
+# do the checks
+conf = Configure(env)
+if checking:
+	if not conf.CheckCXXHeader('aureservoir/aureservoir.h'):
+		print 'Did not find aureservoir header (aureservoir/aureservoir.h) !'
+		Exit(1)
+	if not conf.CheckLib('flens', language="C++"):
+		print 'Did not find FLENS library !'
+		Exit(1)
+	if not conf.CheckCXXHeader('flens/flens.h'):
+		print 'Did not find FLENS header !'
+		Exit(1)
+	#if not conf.CheckHeader('octave/oct.h'):
+		#print 'Did not find Octave headers !'
+		#Exit(1)
+env = conf.Finish()
+
+#####################################################################
+#  build oct-files
+#####################################################################
+
+octfile = "esn_new.oct"
+source = "oct_esn.cpp"
+
+env.SharedLibrary( octfile,
+                   source,
+                   SHLIBPREFIX="",
+                   SHLIBSUFFIX="" )
+
+# make links to access the different methods
+env.Command("esn_init.oct", octfile, "ln -s $SOURCE $TARGET")
+env.Command("esn_set.oct", octfile, "ln -s $SOURCE $TARGET")
+env.Command("esn_print.oct", octfile, "ln -s $SOURCE $TARGET")
+
+# TODO: handle this for windows
+
+#####################################################################
+#  additional cleanup of the links
+#####################################################################
+
+if env.GetOption('clean'):
+	Delete("*.oct")
+
+#####################################################################
+#  EOF
+#####################################################################
