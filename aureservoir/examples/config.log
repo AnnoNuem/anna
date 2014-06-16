@@ -1,0 +1,21 @@
+file /home/axel/anna/aureservoir/examples/SConstruct,line 75:
+	Configure(confdir = .sconf_temp)
+scons: Configure: Checking for C++ library flens... 
+.sconf_temp/conftest_0.cpp <-
+  |
+  |
+  |
+  |int
+  |main() {
+  |  
+  |return 0;
+  |}
+  |
+g++ -o .sconf_temp/conftest_0.o -c -O2 -fPIC -Wall -ffast-math -mfpmath=sse -msse -msse2 -I. -I/home/axel/anna/aureservoir -I/home/axel/anna/flens/flens .sconf_temp/conftest_0.cpp
+distcc[907] (dcc_build_somewhere) Warning: failed to distribute, running locally instead
+g++: error: unrecognized command line option '-mfpmath=sse'
+g++: error: unrecognized command line option '-msse'
+g++: error: unrecognized command line option '-msse2'
+distcc[907] ERROR: compile .sconf_temp/conftest_0.cpp on localhost failed
+scons: Configure: no
+

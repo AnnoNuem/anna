@@ -17,7 +17,7 @@
  *
  ***************************************************************************/
 
-#include "aureservoir/aureservoir.h"
+#include "aureservoir.h"
 
 #define TYPE double
 
