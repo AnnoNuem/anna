@@ -16,6 +16,13 @@ int main(int argc, const char* argv[]){
 	const char keyIgnoreUltraschall = 'f';
 
 	unsigned int distance;
+
+	// braitenberg parameter
+	uchar hueLeft;
+	uchar hueRight;
+	uchar *frameData;
+	uchar bias = 60;
+	uchar multiplikator = 1;
 	bool ignoreUltraschall = false;
 
 	initscr();
@@ -45,8 +52,23 @@ int main(int argc, const char* argv[]){
 	do{
 		distance = u.getDistance();
 		clear();
-		printw("Distance is: %d", distance);
+		printw("Distance is: %d \n", distance);
 		v->process();
+		////////////////
+		frameData = (uchar*) (v->frameBw.data);
+		
+		/**
+		for(int i = 0; i < v->frameBw.cols; i++){
+			printw(" \n");
+			for(int j = 0; j < v->frameBw.rows; j++){
+				printw(" %d", frameData[j + i]);
+			}
+		}
+		**/
+		///////////////
+		hueLeft = (frameData[0]-bias) * multiplikator;
+		hueRight = (frameData[1]-bias) * multiplikator;
+		printw("HueLeft is: %d and HueRight is: %d", hueLeft, hueRight);
 		if (distance < 60 && !ignoreUltraschall)
 		{
 			m.stop();
@@ -61,6 +83,8 @@ int main(int argc, const char* argv[]){
 			case keyChangeDirection: m.changeDirection(); break;
 			case keyIgnoreUltraschall: ignoreUltraschall = !ignoreUltraschall; break;
 		}
+		m.setLeftSpeed(hueRight);
+		m.setRightSpeed(hueLeft);
 	}while( ch != 'x');
 	endwin();
 	return 0;

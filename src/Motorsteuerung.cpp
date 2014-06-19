@@ -121,6 +121,19 @@ void Motorsteuerung::setSpeed(int speed)
 		}
 	}
 }
+
+void Motorsteuerung::setRightSpeed(int speed)
+{
+	RightSpeed = speed;
+	this->writeOut();
+}
+
+void Motorsteuerung::setLeftSpeed(int speed)
+{
+	LeftSpeed = speed;
+	this->writeOut();
+}
+
 	
 void Motorsteuerung::writeOut(void){
 	if(LeftSpeed > 0)

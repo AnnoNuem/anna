@@ -2,6 +2,8 @@
 #define __Video__hpp__
 
 #include <opencv2/opencv.hpp>
+#include <sstream>
+#include <string>
 
 using namespace cv;
 
@@ -9,7 +11,14 @@ class Video{
 	VideoCapture cap;
 	Mat frame;
 	Mat frameSmall;
+	public:
+	Mat frameBw;
+	private:
 	Size sizeSmall;
+
+
+	private:
+	int count;
 
 	Video();
 

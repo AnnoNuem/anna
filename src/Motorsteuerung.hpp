@@ -58,6 +58,8 @@ class Motorsteuerung{
 	void changeDirectionLeft(void);
 	void changeDirectionRight(void);
 	void writeOut(void);
+	void setRightSpeed(int speed);
+	void setLeftSpeed(int speed);
 };
 #endif
 
