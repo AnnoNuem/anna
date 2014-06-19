@@ -3,6 +3,7 @@
 #include "Video.hpp"
 #include <curses.h>
 #include <iostream>
+#include <math.h>
 
 int main(int argc, const char* argv[]){
 	int ch;
@@ -18,11 +19,22 @@ int main(int argc, const char* argv[]){
 	unsigned int distance;
 
 	// braitenberg parameter
-	uchar hueLeft;
-	uchar hueRight;
+	const char keyBiasUp = 'u';
+	const char keyBiasDown = 'h';
+	const char keyMultUp = 'i';
+	const char keyMultDown = 'j';
+	double hueLeft;
+	double hueRight;
+	double hueLeftOld;
+	double hueRightOld;
 	uchar *frameData;
-	uchar bias = 60;
-	uchar multiplikator = 1;
+	double bias = 0;
+	double biasDelta = 1;
+	double multiplikator = 1;
+	double multiplikatorDelta = 0.1;
+
+
+
 	bool ignoreUltraschall = false;
 
 	initscr();
@@ -54,37 +66,62 @@ int main(int argc, const char* argv[]){
 		clear();
 		printw("Distance is: %d \n", distance);
 		v->process();
-		////////////////
+
+		// braitenberg computations
 		frameData = (uchar*) (v->frameBw.data);
 		
-		/**
-		for(int i = 0; i < v->frameBw.cols; i++){
-			printw(" \n");
-			for(int j = 0; j < v->frameBw.rows; j++){
-				printw(" %d", frameData[j + i]);
-			}
+		
+		hueLeft = ((double)frameData[0]+bias) * multiplikator;
+		hueRight = ((double)frameData[1]+bias) * multiplikator;
+		
+
+		hueLeft = (hueLeft + hueLeftOld) / 2;
+		hueRight = (hueRight + hueRightOld) / 2;
+
+		if (hueRight < 0)
+		{
+			hueRight = 0;
 		}
-		**/
-		///////////////
-		hueLeft = (frameData[0]-bias) * multiplikator;
-		hueRight = (frameData[1]-bias) * multiplikator;
-		printw("HueLeft is: %d and HueRight is: %d", hueLeft, hueRight);
+		if (hueRight > 100)
+		{
+			hueRight = 100;
+		}
+
+		if (hueLeft < 0)
+		{
+			hueLeft= 0;
+		}
+		if (hueLeft > 100)
+		{
+			hueLeft = 100;
+		}
+
+		printw("HueLeft is: %f and HueRight is: %f \n", hueLeft, hueRight);
+		printw("Bias is: %f and multiplikator is: %f", bias, multiplikator);
 		if (distance < 60 && !ignoreUltraschall)
 		{
 			m.stop();
 		}
-		ch = getch();
-		switch(ch){
-			case keyLeft: m.left(); break;
-			case keyRight: m.right(); break;
-			case keyForward: m.faster(); break;
-			case keyBackward: m.slower(); break;
-			case keyHandbrake: m.stop(); break;
-			case keyChangeDirection: m.changeDirection(); break;
-			case keyIgnoreUltraschall: ignoreUltraschall = !ignoreUltraschall; break;
+		else
+		{
+			ch = getch();
+			switch(ch)
+			{
+				case keyLeft: m.left(); break;
+				case keyRight: m.right(); break;
+				case keyForward: m.faster(); break;
+				case keyBackward: m.slower(); break;
+				case keyHandbrake: m.stop(); break;
+				case keyChangeDirection: m.changeDirection(); break;
+				case keyIgnoreUltraschall: ignoreUltraschall = !ignoreUltraschall; break;
+				case keyBiasUp: bias += biasDelta; break;
+				case keyBiasDown: bias -= biasDelta; break;
+				case keyMultUp: multiplikator += multiplikatorDelta; break;
+				case keyMultDown: multiplikator -= multiplikatorDelta; break;
+			}
+			m.setLeftSpeed(hueRight);
+			m.setRightSpeed(hueLeft);
 		}
-		m.setLeftSpeed(hueRight);
-		m.setRightSpeed(hueLeft);
 	}while( ch != 'x');
 	endwin();
 	return 0;
