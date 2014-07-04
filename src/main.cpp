@@ -5,6 +5,23 @@
 #include <iostream>
 #include <math.h>
 
+
+double meanv;
+bool learn;
+unsigned int iterations;
+double summe;
+
+void toogleLearn()
+{
+	if (learn)
+	{
+		meanv = summe / ( 2 * iterations);
+		iterations = 0;
+		summe = 0;
+	}
+	learn = !learn;
+}
+
 int main(int argc, const char* argv[]){
 	int ch;
 
@@ -23,16 +40,21 @@ int main(int argc, const char* argv[]){
 	const char keyBiasDown = 'h';
 	const char keyMultUp = 'i';
 	const char keyMultDown = 'j';
+	const char keyLearn = 'l';
 	double hueLeft;
 	double hueRight;
 	double hueLeftOld;
 	double hueRightOld;
 	uchar *frameData;
-	double bias = -98;
+	double bias = 0;
 	double biasDelta = 1;
-	double multiplikator = 1;
+	double multiplikator = 0.5;
 	double multiplikatorDelta = 0.1;
 	double delta = 0.5;
+	meanv = 0;
+	learn = true;
+	iterations = 0;
+	summe;
 
 
 
@@ -70,31 +92,43 @@ int main(int argc, const char* argv[]){
 
 		// braitenberg computations
 		frameData = (uchar*) (v->frameBw.data);
-		
-		
-		hueLeft = ((double)frameData[0]+bias) * multiplikator;
-		hueRight = ((double)frameData[1]+bias) * multiplikator;
-		
 
-		hueLeft = (hueLeft + hueLeftOld) / 2;
-		hueRight = (hueRight + hueRightOld) / 2;
-
-		if (hueRight < 0)
+		hueLeft = ((double)frameData[0]);
+		hueRight = ((double)frameData[1]);
+		
+		
+		if( learn)
 		{
+			summe = summe + hueLeft + hueRight;
+			iterations++;
+			hueLeft = 0;
 			hueRight = 0;
-		}
-		if (hueRight > 100)
+			printw("Learning.\n");
+		}else
 		{
-			hueRight = 100;
-		}
+			hueLeft = ((double)frameData[0]-meanv+bias) * multiplikator;
+			hueRight = ((double)frameData[1]-meanv+bias) * multiplikator;
 
-		if (hueLeft < 0)
-		{
-			hueLeft= 0;
-		}
-		if (hueLeft > 100)
-		{
-			hueLeft = 100;
+			hueLeft = (hueLeft + hueLeftOld) / 2;
+			hueRight = (hueRight + hueRightOld) / 2;
+
+			if (hueRight < 0)
+			{
+				hueRight = 0;
+			}
+			if (hueRight > 100)
+			{
+				hueRight = 100;
+			}
+
+			if (hueLeft < 0)
+			{
+				hueLeft= 0;
+			}
+			if (hueLeft > 100)
+			{
+				hueLeft = 100;
+			}
 		}
 
 		printw("HueLeft is: %f and HueRight is: %f \n", hueLeft, hueRight);
@@ -108,6 +142,7 @@ int main(int argc, const char* argv[]){
 			ch = getch();
 			switch(ch)
 			{
+				case keyLearn: toogleLearn(); break;
 				case keyLeft: m.left(); break;
 				case keyRight: m.right(); break;
 				case keyForward: m.faster(); break;
@@ -129,3 +164,5 @@ int main(int argc, const char* argv[]){
 	endwin();
 	return 0;
 }
+
+
